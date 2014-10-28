@@ -83,35 +83,40 @@ module Refinery
         end
       end
 
-
-       <% if include_spam? %>
-
-        context "mark as ham" do
-
-          it "should succeed" do
-            visit refinery.<%= namespacing.underscore %>_admin_<%= plural_name %>_path
-
-            within "#actions" do
-              click_link ::I18n.t('.<%= singular_name %>.mark_as_ham')
-            end
-
-            fail("Implement this test")
-        end
-        end
-
-        context "mark as spam" do
+      <% if include_spam? %> context "mark as spam" do
           before { FactoryGirl.create(:<%= singular_name %>, :<%= title.name %> => "A <%= title.name %>") }
 
           it "should succeed" do
             visit refinery.<%= namespacing.underscore %>_admin_<%= plural_name %>_path
 
             within ".actions" do
-              click_link ::I18n.t('mark_as_spam')              
+              click_link ::I18n.t('.refinery.<%= plural_name %>.admin.<%= plural_name %>.<%= singular_name %>.mark_as_spam')
             end
 
-            fail("Implement this test")
-
+            expect(page).to have_content("Spam (1)")
+            Refinery::<%= namespacing %>::<%= class_name %>.spam.count.should == 1 
           end
+        end
+
+        context "mark as ham" do
+          before { FactoryGirl.create(:<%= singular_name %>, :<%= title.name %> => "A <%= title.name %>") }
+
+          it "should succeed" do
+            visit refinery.<%= namespacing.underscore %>_admin_<%= plural_name %>_path
+
+            within ".actions" do
+              click_link ::I18n.t('.refinery.<%= plural_name %>.admin.<%= plural_name %>.<%= singular_name %>.mark_as_spam')
+            end
+
+            click_link "Spam (1)"
+
+            within ".actions" do
+              click_link ::I18n.t('.refinery.<%= plural_name %>.admin.<%= plural_name %>.<%= singular_name %>.mark_as_ham')
+            end
+
+            expect(page).to have_content("Spam")
+            Refinery::<%= namespacing %>::<%= class_name %>.spam.count.should == 0
+        end
         end
       <% end %>
 
