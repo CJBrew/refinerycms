@@ -5,11 +5,11 @@ module Refinery
   module <%= namespacing %>
     module Admin 
       describe <%= class_name %> do
-        before{ refinery_login_with :refinery_user }
+        refinery_login_with :refinery_user
 
 <% if (title = attributes.detect { |a| a.type.to_s == "string" }).present? %>
 
-       describe "<%= plural_name %> list" do
+       context "<%= plural_name %> list" do
           before do
             FactoryGirl.create(:<%= singular_name %>, :<%= title.name %> => "UniqueTitleOne")
             FactoryGirl.create(:<%= singular_name %>, :<%= title.name %> => "UniqueTitleTwo")
@@ -22,14 +22,17 @@ module Refinery
           end
         end
 
-       describe "show" do
+       context "show" do
+          let!(:poi) do
+            FactoryGirl.create(:<%= singular_name %>, :<%= title.name %> => "UniqueTitleOne")
+          end
+
          it "has expected text and menu" do
            visit refinery.<%= namespacing.underscore %>_admin_<%= plural_name %>_path
 
            click_link "Read the <%= singular_name %>"
 
            expect(page).to have_content("UniqueTitleOne")
-           expect(page).not_to have_content("UniqueTitleTwo")
 
            within "#actions" do
              expect(page).to have_content("Age")
@@ -41,7 +44,7 @@ module Refinery
          end
        end
 
-       describe "when no " do
+       context "when no " do
          before { Refinery::<%= namespacing %>::<%= class_name %>.destroy_all }
 
          context "<%= plural_name %>" do
@@ -63,7 +66,7 @@ module Refinery
           <% end %>
        end
 
-      describe "action links" do
+      context "action links" do
         before { visit refinery.<%= plural_name %>_admin_<%= plural_name %>_path }
 
         specify "in the side pane" do
@@ -83,7 +86,7 @@ module Refinery
 
        <% if include_spam? %>
 
-        describe "mark as ham" do
+        context "mark as ham" do
 
           it "should succeed" do
             visit refinery.<%= namespacing.underscore %>_admin_<%= plural_name %>_path
@@ -96,7 +99,7 @@ module Refinery
         end
         end
 
-        describe "mark as spam" do
+        context "mark as spam" do
           before { FactoryGirl.create(:<%= singular_name %>, :<%= title.name %> => "A <%= title.name %>") }
 
           it "should succeed" do
@@ -112,7 +115,7 @@ module Refinery
         end
       <% end %>
 
-        describe "destroy" do
+        context "destroy" do
           before { FactoryGirl.create(:<%= singular_name %>, :<%= title.name %> => "UniqueTitleOne") }
 
           it "should succeed" do
@@ -125,7 +128,7 @@ module Refinery
           end
         end
 
-          describe "destroy from <%= singular_name %> show page" do
+          context "destroy from <%= singular_name %> show page" do
           before { FactoryGirl.create(:<%= singular_name %>, :<%= title.name %> => "UniqueTitleOne") }
 
           it "should succeed" do
