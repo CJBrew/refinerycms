@@ -144,8 +144,42 @@ module Refinery
             page.should have_content("'UniqueTitleOne' was successfully removed.")
             Refinery::<%= namespacing %>::<%= class_name %>.count.should == 0
           end
-        end
-<% end %>
+          end
+
+          describe "update who gets notified" do
+            it "sets receiver", :js => true do
+              visit refinery.<%= plural_name %>_admin_<%= plural_name %>_path
+
+              click_link "Update who gets notified"
+
+              puts page.body
+
+              within_frame "dialog_iframe" do
+                fill_in ".settings_value_name", :with => "phil@refinerycms.com"
+                click_button "submit_button"
+              end
+
+              expect(page).to have_content("Notification Recipients was successfully updated.")
+            end
+          end
+
+          describe "updating confirmation email copy" do
+            it "sets message", :js => true do
+              visit refinery.<%= plural_name %>_admin_<%= plural_name %>_path
+
+              click_link "Edit confirmation email"
+
+              within_frame "dialog_iframe" do
+                fill_in "setting[subject[en]]", :with => "subject"
+                fill_in "setting[message[en]]", :with => "message"
+                click_button "Save"
+              end
+
+              expect(page).to have_content("Confirmation Body was successfully updated.")
+            end
+          end
+
+        <% end %>
       end
     end
   end
