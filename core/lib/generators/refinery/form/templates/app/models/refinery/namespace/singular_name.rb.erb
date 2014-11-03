@@ -1,9 +1,13 @@
+require 'filters_spam' 
+
 module Refinery
   module <%= class_name.pluralize %>
     class <%= class_name %> < Refinery::Core::BaseModel
 <% if table_name == namespacing.underscore.pluralize -%>
       self.table_name = 'refinery_<%= plural_name %>'
 <% end -%>
+
+  filters_spam author_field: :name
 
       attr_accessible <%= names_for_attr_accessible.map { |a| ":#{a}" }.join(', ') %>, :position
 <% if (text_fields = attributes.map { |a| a.name if a.type == :text }.compact.uniq).any? && text_fields.detect{ |a| a.to_s == 'message' }.nil? -%>
