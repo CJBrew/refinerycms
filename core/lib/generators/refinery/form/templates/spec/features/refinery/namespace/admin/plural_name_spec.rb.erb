@@ -3,9 +3,10 @@ require "spec_helper"
 
 module Refinery
   module <%= namespacing %>
-    describe "Admin" do
-      describe "<%= plural_name %>" do
-        refinery_login_with :refinery_user
+    module Admin 
+      describe <%= class_name %> do
+        before{ refinery_login_with :refinery_user }
+
 <% if (title = attributes.detect { |a| a.type.to_s == "string" }).present? %>
 
        describe "<%= plural_name %> list" do
