@@ -21,7 +21,31 @@ module Refinery
           end
         end
 
-      <% if include_spam? %>
+       describe "when no " do
+         before { Refinery::<%= namespacing %>::<%= class_name %>.destroy_all }
+
+         context "<%= plural_name %>" do
+           it "shows expected message" do
+            visit refinery.<%= plural_name %>_admin_<%= plural_name %>_path
+
+            expect(page).to have_content("You have not received any <%= plural_name %> yet.")
+
+            end
+           end
+
+           <% if include_spam? %>
+         context "spam <%= plural_name %>" do
+            it "shows expected message" do
+              visit refinery.spam_<%= plural_name %>_admin_<%= plural_name %>_path
+
+              expect(page).to have_content("Hooray! You don't have any spam.")
+            end
+         end
+          <% end %>
+       end
+
+       <% if include_spam? %>
+
         describe "mark as ham" do
 
           it "should succeed" do
@@ -32,6 +56,7 @@ module Refinery
             end
 
             fail("Implement this test")
+        end
         end
 
         describe "mark as spam" do
@@ -46,7 +71,6 @@ module Refinery
 
             fail("Implement this test")
 
-    end
           end
         end
       <% end %>
