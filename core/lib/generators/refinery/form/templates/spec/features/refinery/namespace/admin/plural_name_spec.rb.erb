@@ -3,7 +3,7 @@ require "spec_helper"
 
 module Refinery
   module <%= namespacing %>
-    module Admin 
+    module Admin
       describe <%= class_name %> do
         refinery_login_with :refinery_user
 
@@ -23,7 +23,7 @@ module Refinery
         end
 
        context "show" do
-          let!(:poi) do
+          let!(:<%= singular_name %>) do
             FactoryGirl.create(:<%= singular_name %>, :<%= title.name %> => "UniqueTitleOne")
           end
 
@@ -94,7 +94,7 @@ module Refinery
             end
 
             expect(page).to have_content("Spam (1)")
-            Refinery::<%= namespacing %>::<%= class_name %>.spam.count.should == 1 
+            Refinery::<%= namespacing %>::<%= class_name %>.spam.count.should == 1
           end
         end
 
@@ -147,6 +147,11 @@ module Refinery
           end
 
           describe "update who gets notified" do
+            before do
+              Rails.cache.clear
+              Refinery::<%= namespacing %>::Setting.notification_recipients
+            end
+
             it "sets receiver", :js => true do
               visit refinery.<%= plural_name %>_admin_<%= plural_name %>_path
 
@@ -155,7 +160,7 @@ module Refinery
               puts page.body
 
               within_frame "dialog_iframe" do
-                fill_in ".settings_value_name", :with => "phil@refinerycms.com"
+                fill_in ::I18n.t('.refinery.<%= namespacing.underscore %>.admin.settings.notification_recipients_form.settings_value_name'), :with => "phil@refinerycms.com"
                 click_button "submit_button"
               end
 
@@ -164,14 +169,21 @@ module Refinery
           end
 
           describe "updating confirmation email copy" do
+            before do
+              Rails.cache.clear
+              Refinery::<%= namespacing %>::Setting.notification_recipients
+            end
+
+
             it "sets message", :js => true do
               visit refinery.<%= plural_name %>_admin_<%= plural_name %>_path
 
               click_link "Edit confirmation email"
 
               within_frame "dialog_iframe" do
-                fill_in "setting[subject[en]]", :with => "subject"
-                fill_in "setting[message[en]]", :with => "message"
+                fill_in ::I18n.t('.refinery.<%= namespacing.underscore %>.admin.settings.confirmation_email_form.subject'), :with => "subject"
+                fill_in ::I18n.t('.refinery.<%= namespacing.underscore %>.admin.settings.confirmation_email_form.message'), :with => "message"
+
                 click_button "Save"
               end
 
@@ -182,5 +194,5 @@ module Refinery
         <% end %>
       end
     end
-  end
+    end
 end
