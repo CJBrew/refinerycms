@@ -32,7 +32,6 @@ module Refinery
 
             end
            end
-
            <% if include_spam? %>
          context "spam <%= plural_name %>" do
             it "shows expected message" do
@@ -66,7 +65,7 @@ module Refinery
             visit refinery.<%= namespacing.underscore %>_admin_<%= plural_name %>_path
 
             within ".actions" do
-              click_link "Mark as spam"
+              click_link ::I18n.t('mark_as_spam')              
             end
 
             fail("Implement this test")
