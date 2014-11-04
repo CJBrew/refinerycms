@@ -51,8 +51,8 @@ module Refinery
           it "should succeed" do
             visit refinery.<%= namespacing.underscore %>_admin_<%= plural_name %>_path
 
-            within ".actions" do
-              click_link "Mark as ham"
+            within "#actions" do
+              click_link ::I18n.t('.<%= singular_name %>.mark_as_ham')
             end
 
             fail("Implement this test")
