@@ -4,13 +4,12 @@ module Refinery
 
       crudify :'refinery/user',
               :order => 'username ASC',
-              :title_attribute => 'username',
-              :xhr_paging => true
+              :title_attribute => 'username'
 
-      before_filter :find_available_plugins, :find_available_roles,
+      before_action :find_available_plugins, :find_available_roles,
                     :only => [:new, :create, :edit, :update]
-      before_filter :redirect_unless_user_editable!, :only => [:edit, :update]
-      before_filter :exclude_password_assignment_when_blank!, :only => :update
+      before_action :redirect_unless_user_editable!, :only => [:edit, :update]
+      before_action :exclude_password_assignment_when_blank!, :only => :update
 
       def new
         @user = Refinery::User.new
@@ -55,6 +54,7 @@ module Refinery
       end
 
       protected
+
       def create_successful
         @user.plugins = @selected_plugin_names
 
@@ -71,7 +71,7 @@ module Refinery
       end
 
       def create_failed
-        render :action => 'new'
+        render 'new'
       end
 
       def update_successful

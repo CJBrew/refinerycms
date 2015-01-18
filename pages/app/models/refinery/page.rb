@@ -14,7 +14,7 @@ module Refinery
       is_seo_meta
 
       def self.seo_fields
-        ::SeoMeta.attributes.keys.map{|a| [a, :"#{a}="]}.flatten
+        ::SeoMeta.attributes.keys.map{ |a| [a, :"#{a}="]}.flatten
       end
     end
 
@@ -24,7 +24,7 @@ module Refinery
       end
 
       def self.options
-        # Docs for friendly_id http://github.com/norman/friendly_id
+        # Docs for friendly_id https://github.com/norman/friendly_id
         friendly_id_options = {
           use: [:reserved],
           reserved_words: self.reserved_words
@@ -40,7 +40,7 @@ module Refinery
 
     # If title changes tell friendly_id to regenerate slug when saving record
     def should_generate_new_friendly_id?
-      changes.keys.include?("title")
+      changes.keys.include?("title") || changes.keys.include?("custom_slug")
     end
 
     # Delegate SEO Attributes to globalize translation
@@ -114,7 +114,7 @@ module Refinery
       # are translated which means the slug attribute does not exist on the
       # pages table thus requiring us to find the attribute on the translations table
       # and then join to the pages table again to return the associated record.
-      def by_slug(slug, conditions={})
+      def by_slug(slug, conditions = {})
         Pages::Finder.by_slug(slug, conditions)
       end
 
@@ -148,6 +148,7 @@ module Refinery
       alias_method_chain :rebuild!, :slug_nullification
 
       protected
+
       def nullify_duplicate_slugs_under_the_same_parent!
         t_slug = translation_class.arel_table[:slug]
         joins(:translations).group(:locale, :parent_id, t_slug).having(t_slug.count.gt(1)).count.
@@ -161,7 +162,7 @@ module Refinery
     end
 
     def translated_to_default_locale?
-      persisted? && translations.any?{|t| t.locale == Refinery::I18n.default_frontend_locale}
+      persisted? && translations.any?{ |t| t.locale == Refinery::I18n.default_frontend_locale}
     end
 
     # The canonical page for this particular page.
@@ -180,7 +181,8 @@ module Refinery
     # Returns in cascading order: custom_slug or menu_title or title depending on
     # which attribute is first found to be present for this page.
     def custom_slug_or_title
-      custom_slug.presence || menu_title.presence || title.presence
+      (Refinery::Pages.use_custom_slugs && custom_slug.presence) ||
+        menu_title.presence || title.presence
     end
 
     # Am I allowed to delete this page?
@@ -215,19 +217,14 @@ module Refinery
       self.destroy
     end
 
-    # Used for the browser title to get the full path to this page
-    # It automatically prints out this page title and all of it's parent page titles joined by a PATH_SEPARATOR
-    def path(options = {})
-      # Override default options with any supplied.
-      options = {:reversed => true}.merge(options)
+    # Returns the full path to this page.
+    # This automatically prints out this page title and all parent page titles.
+    # The result is joined by the path_separator argument.
+    def path(path_separator: ' - ', ancestors_first: true)
+      return title if root?
 
-      if parent_id
-        parts = [title, parent.path(options)]
-        parts.reverse! if options[:reversed]
-        parts.join(' - ')
-      else
-        title
-      end
+      chain = ancestors_first ? self_and_ancestors : self_and_ancestors.reverse
+      chain.map(&:title).join(path_separator)
     end
 
     def url
@@ -235,11 +232,12 @@ module Refinery
     end
 
     def nested_url
-      globalized_slug = Globalize.with_locale(slug_locale) { to_param.to_s }
-      if ::Refinery::Pages.scope_slug_by_parent
-        [parent.try(:nested_url), globalized_slug].compact.flatten
-      else
-        [globalized_slug]
+      Globalize.with_locale(slug_locale) do
+        if ::Refinery::Pages.scope_slug_by_parent && !root?
+          self_and_ancestors.includes(:translations).map(&:to_param)
+        else
+          [to_param.to_s]
+        end
       end
     end
 
@@ -336,7 +334,7 @@ module Refinery
           .sub(%r{/*$}, '')
           .split('/')
           .select(&:present?)
-          .map {|slug| self.normalize_friendly_id_with_marketable_urls(slug) }.join('/')
+          .map { |slug| self.normalize_friendly_id_with_marketable_urls(slug) }.join('/')
       end
 
       def self.normalize_friendly_id_with_marketable_urls(slug_string)

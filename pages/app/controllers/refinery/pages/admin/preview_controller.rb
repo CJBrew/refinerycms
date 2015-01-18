@@ -8,7 +8,7 @@ module Refinery
         include Refinery::Admin::BaseController
         include Pages::RenderOptions
 
-        skip_before_filter :error_404, :set_canonical
+        skip_before_action :error_404, :set_canonical
 
         layout :layout
 
@@ -17,6 +17,7 @@ module Refinery
         end
 
         protected
+
         def admin?
           false
         end

@@ -34,7 +34,6 @@ module Refinery
         :search_conditions => '',
         :sortable => true,
         :title_attribute => "title",
-        :xhr_paging => false,
         :class_name => class_name,
         :singular_name => singular_name,
         :plural_name => plural_name
@@ -50,6 +49,7 @@ module Refinery
 
       def crudify(model_name, options = {})
         options = ::Refinery::Crud.default_options(model_name).merge(options)
+        Refinery.deprecate :xhr_paging, when: '3.1' if options[:xhr_paging]
         class_name = options[:class_name]
         singular_name = options[:singular_name]
         plural_name = options[:plural_name]
@@ -59,9 +59,9 @@ module Refinery
             #{options.inspect}
           end
 
-          prepend_before_filter :find_#{singular_name},
+          prepend_before_action :find_#{singular_name},
                                 :only => [:update, :destroy, :edit, :show]
-          prepend_before_filter :merge_position_into_params!, :only => :create
+          prepend_before_action :merge_position_into_params!, :only => :create
 
           def new
             @#{singular_name} = #{class_name}.new
@@ -231,7 +231,7 @@ module Refinery
 
         # Methods that are only included when this controller is searchable.
         if options[:searchable]
-          if options[:paging] || options[:xhr_paging]
+          if options[:paging]
             module_eval %(
               def index
                 search_all_#{plural_name} if searching?
@@ -255,7 +255,7 @@ module Refinery
           end
 
         else
-          if options[:paging] || options[:xhr_paging]
+          if options[:paging]
             module_eval %(
               def index
                 paginate_all_#{plural_name}
@@ -280,7 +280,7 @@ module Refinery
               find_all_#{plural_name}
             end
 
-            # Based upon http://github.com/matenia/jQuery-Awesome-Nested-Set-Drag-and-Drop
+            # Based upon https://github.com/matenia/jQuery-Awesome-Nested-Set-Drag-and-Drop
             def update_positions
               previous = nil
               params[:ul].each do |_, list|
@@ -291,7 +291,7 @@ module Refinery
                   if @current_#{singular_name}.respond_to?(:move_to_root)
                     if previous.present?
                       @current_#{singular_name}.move_to_right_of(#{class_name}.find_by_id(previous))
-                    else
+                    elsif !@current_#{singular_name}.root?
                       @current_#{singular_name}.move_to_root
                     end
                   else
@@ -313,10 +313,14 @@ module Refinery
 
             def update_child_positions(_node, #{singular_name})
               list = _node['children']['0']
-              list.sort_by {|k, v| k.to_i}.map { |item| item[1] }.each_with_index do |child, index|
+              child_positions_changed = false
+              list.sort_by { |k, v| k.to_i}.map { |item| item[1] }.each_with_index do |child, index|
                 child_id = child['id'].split(/#{singular_name}\_?/).reject(&:empty?).first
                 child_#{singular_name} = #{class_name}.where(:id => child_id).first
-                child_#{singular_name}.move_to_child_of(#{singular_name})
+                child_positions_changed ||= #{singular_name}.children[index] != child_#{singular_name}
+                if child_positions_changed
+                  child_#{singular_name}.move_to_child_of(#{singular_name})
+                end
 
                 if child['children'].present?
                   update_child_positions(child, child_#{singular_name})
@@ -335,20 +339,16 @@ module Refinery
         module_eval %(
           class << self
             def pageable?
-              #{options[:paging].to_s} || #{options[:xhr_paging].to_s}
+              #{options[:paging]}
             end
             alias_method :paging?, :pageable?
 
-            def xhr_pageable?
-              #{options[:xhr_paging].to_s}
-            end
-
             def sortable?
-              #{options[:sortable].to_s}
+              #{options[:sortable]}
             end
 
             def searchable?
-              #{options[:searchable].to_s}
+              #{options[:searchable]}
             end
           end
         )

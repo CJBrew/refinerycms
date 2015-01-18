@@ -3,10 +3,10 @@ module ::Refinery
     class DialogsController < ::Refinery::AdminController
       TYPES = %w[image link]
 
-      before_filter :find_dialog_type, :find_iframe_src, :only => [:show]
+      before_action :find_dialog_type, :find_iframe_src, :only => [:show]
 
       def index
-        redirect_to refinery.admin_root_path
+        redirect_to Refinery::Core.backend_path
       end
 
       def show
@@ -18,6 +18,7 @@ module ::Refinery
       end
 
       protected
+
       def find_dialog_type
         error_404 if TYPES.exclude? params[:id].downcase
 
@@ -35,7 +36,7 @@ module ::Refinery
       end
 
       def url_params
-        params.reject {|key, value| /(action)|(controller)/ === key}.
+        params.reject { |key, value| /(action)|(controller)/ === key}.
                merge :id => nil
       end
 

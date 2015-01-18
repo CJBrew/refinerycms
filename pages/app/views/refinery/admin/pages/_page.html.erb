@@ -12,10 +12,17 @@
     </span>
     <% if Refinery::I18n.frontend_locales.many? %>
       <span class='locales'>
-        <% page.translations.sort_by{|t| Refinery::I18n.frontend_locales.index(t.locale)}.each do |translation| %>
-          <%= link_to refinery_icon_tag("flags/#{translation.locale}.png", :size => '16x11'),
-                      refinery.edit_admin_page_path(page.nested_url, :switch_locale => translation.locale),
-                      :class => 'locale' if translation.title.present? %>
+        <% page.translations.sort_by{ |t| Refinery::I18n.frontend_locales.index(t.locale)}.each do |translation| %>
+          <% if translation.title.present? %>
+            <%= link_to refinery.admin_edit_page_path(page.nested_url, :switch_locale => translation.locale),
+                        :class => 'locale', :title => translation.locale.upcase do %>
+
+              <div class="locale_icon <%= translation.locale %>">
+                <%= refinery_icon_tag('locale-blue.svg', :size => '24x24', :alt => translation.locale.upcase) %>
+                <span class="code"><%= locale_country(translation.locale) %></span>
+              </div>
+            <% end %>
+          <% end %>
         <% end %>
       </span>
     <% end %>
@@ -30,11 +37,11 @@
                   :title => t('new', :scope => 'refinery.admin.pages') %>
 
       <%= link_to refinery_icon_tag('application_edit.png'),
-                  refinery.edit_admin_page_path(page.nested_url, :switch_locale => (page.translations.first.locale unless page.translated_to_default_locale?)),
+                  refinery.admin_edit_page_path(page.nested_url, :switch_locale => (page.translations.first.locale unless page.translated_to_default_locale?)),
                   :title => t('edit', :scope => 'refinery.admin.pages') %>
 
       <%= link_to refinery_icon_tag('delete.png'),
-                  refinery.admin_page_path(page.nested_url),
+                  refinery.admin_delete_page_path(page.nested_url),
                   :class => "cancel confirm-delete",
                   :title => t('delete', :scope => 'refinery.admin.pages'),
                   :data => {

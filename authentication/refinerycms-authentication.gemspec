@@ -13,7 +13,7 @@ Gem::Specification.new do |s|
   s.email             = %q{info@refinerycms.com}
   s.homepage          = %q{http://refinerycms.com}
   s.rubyforge_project = %q{refinerycms}
-  s.authors           = ['Philip Arndt', 'Uģis Ozols']
+  s.authors           = ['Philip Arndt', 'Uģis Ozols', 'Rob Yurkowski']
   s.license           = %q{MIT}
   s.require_paths     = %w(lib)
 
@@ -24,4 +24,6 @@ Gem::Specification.new do |s|
   s.add_dependency 'actionmailer',      rails_version
   s.add_dependency 'devise',            ['~> 3.0', '>= 3.2.4']
   s.add_dependency 'friendly_id',       '>= 5.0.0.rc1'
+
+  s.required_ruby_version = Refinery::Version.required_ruby_version
 end

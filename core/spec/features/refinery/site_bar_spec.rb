@@ -1,49 +1,51 @@
 require "spec_helper"
 
 module Refinery
-  describe "site bar" do
+  describe "site bar", :type => :feature do
     refinery_login_with :refinery_user
 
-    it "have logout link" do
-      visit refinery.admin_dashboard_path
+    it "has a logout link" do
+      visit Refinery::Core.backend_path
 
-      page.should have_content("Log out")
-      page.should have_selector("a[href='/refinery/logout']")
+      expect(page).to have_content("Log out")
+      expect(page).to have_selector("a[href='/refinery/logout']")
     end
 
     context "when in backend" do
-      before { visit refinery.admin_dashboard_path }
+      before { visit Refinery::Core.backend_path }
 
-      it "have a 'switch to your website button'" do
-        page.should have_content("Switch to your website")
-        page.should have_selector("a[href='/']")
+      it "has a 'switch to your website button'" do
+        expect(page).to have_content("Switch to your website")
+        expect(page).to have_selector("a[href='/']")
       end
 
       it "switches to frontend" do
-        page.current_path.should == refinery.admin_dashboard_path
+        expect(page.current_path).to match(/\A#{Refinery::Core.backend_path}/)
         click_link "Switch to your website"
-        page.current_path.should == refinery.root_path
+        expect(page.current_path).to eq(refinery.root_path)
       end
     end
 
     context "when in frontend" do
-      before do
-        # make a page in order to avoid 404
-        FactoryGirl.create(:page, :link_url => "/")
+      # make a page in order to avoid 404
+      let!(:root_page) { FactoryGirl.create(:page, :link_url => "/") }
+      before { visit refinery.root_path }
 
-        visit refinery.root_path
-      end
-
-      it "have a 'switch to your website editor' button" do
-        page.should have_content("Switch to your website editor")
-        page.should have_selector("a[href='/refinery']")
+      it "has a 'switch to your website editor' button" do
+        expect(page).to have_content("Switch to your website editor")
+        expect(page).to have_selector("a[href='/refinery']")
       end
 
       it "switches to backend" do
-        page.current_path.should == refinery.root_path
+        expect(page.current_path).to eq(refinery.root_path)
         click_link "Switch to your website editor"
-        page.current_path.should == refinery.admin_root_path
+        expect(page.current_path).to match(/\A#{Refinery::Core.backend_path}/)
       end
+
+      it "has an 'edit this page' button" do
+        expect(page).to have_link("Edit this page", :href => refinery.edit_admin_page_path(root_page))
+      end
+
     end
   end
 end

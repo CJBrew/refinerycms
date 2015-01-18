@@ -8,8 +8,7 @@ module Refinery
               :include => [:translations, :children],
               :paging => false
 
-      before_filter :load_valid_templates, :only => [:edit, :new, :create, :update]
-      before_filter :restrict_access, :only => [:create, :update, :update_positions, :destroy]
+      helper_method :valid_layout_templates, :valid_view_templates
 
       def new
         @page = Page.new(new_page_params)
@@ -25,10 +24,7 @@ module Refinery
 
       def update
         if @page.update_attributes(page_params)
-          flash.notice = t(
-            'refinery.crudify.updated',
-            :what => "'#{@page.title}'"
-          )
+          flash.notice = t('refinery.crudify.updated', what: "'#{@page.title}'")
 
           if from_dialog?
             self.index
@@ -37,10 +33,8 @@ module Refinery
           else
             if params[:continue_editing] =~ /true|on|1/
               if request.xhr?
-                render :partial => 'save_and_continue_callback', :locals => {
-                  :new_refinery_page_path => refinery.admin_page_path(@page.nested_url),
-                  :new_page_path => refinery.pages_admin_preview_page_path(@page.nested_url)
-                }
+                render partial: 'save_and_continue_callback',
+                       locals: save_and_continue_locals(@page)
               else
                 redirect_to :back
               end
@@ -55,7 +49,7 @@ module Refinery
               :include_object_name => true
             }
           else
-            render :action => 'edit'
+            render 'edit'
           end
         end
       end
@@ -73,7 +67,7 @@ module Refinery
       alias_method :page, :find_page
 
       # We can safely assume ::Refinery::I18n is defined because this method only gets
-      # Invoked when the before_filter from the plugin is run.
+      # Invoked when the before_action from the plugin is run.
       def globalize!
         return super unless action_name.to_s == 'index'
 
@@ -85,21 +79,14 @@ module Refinery
         end
       end
 
-      def load_valid_templates
-        @valid_layout_templates = Pages.layout_template_whitelist &
-                                  Pages.valid_templates('app', 'views', '{layouts,refinery/layouts}', '*html*')
-
-        @valid_view_templates = Pages.valid_templates('app', 'views', '{pages,refinery/pages}', '*html*')
+      def valid_layout_templates
+        Pages.layout_template_whitelist & Pages.valid_templates(
+            'app', 'views', '{layouts,refinery/layouts}', '*html*'
+          )
       end
 
-      def restrict_access
-        if current_refinery_user.has_role?(:translator) && !current_refinery_user.has_role?(:superuser) &&
-             (params[:switch_locale].blank? || params[:switch_locale] == Refinery::I18n.default_frontend_locale.to_s)
-          flash[:error] = t('translator_access', :scope => 'refinery.admin.pages')
-          redirect_to refinery.admin_pages_path
-        end
-
-        return true
+      def valid_view_templates
+        Pages.valid_templates('app', 'views', '{pages,refinery/pages}', '*html*')
       end
 
       def page_params
@@ -112,6 +99,17 @@ module Refinery
 
       def new_page_params
         params.permit(:parent_id, :view_template, :layout_template)
+      end
+
+      private
+
+      def save_and_continue_locals(page)
+        nested_url = page.nested_url
+        {
+          new_refinery_edit_page_path: refinery.admin_edit_page_path(nested_url),
+          new_refinery_page_path: refinery.admin_page_path(nested_url),
+          new_page_path: refinery.pages_admin_preview_page_path(nested_url)
+        }
       end
     end
   end

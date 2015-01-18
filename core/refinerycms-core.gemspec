@@ -13,25 +13,25 @@ Gem::Specification.new do |s|
   s.email             = %q{info@refinerycms.com}
   s.homepage          = %q{http://refinerycms.com}
   s.rubyforge_project = %q{refinerycms}
-  s.authors           = ['Philip Arndt', 'Uģis Ozols']
+  s.authors           = ['Philip Arndt', 'Uģis Ozols', 'Rob Yurkowski']
   s.license           = %q{MIT}
   s.require_paths     = %w(lib)
 
   s.files             = `git ls-files`.split("\n")
   s.test_files        = `git ls-files -- spec/*`.split("\n")
 
-  s.required_ruby_version = '>= 2.1.2'
+  s.required_ruby_version = Refinery::Version.required_ruby_version
 
-  s.add_dependency 'refinerycms-i18n',            '~> 3.0.0.dev'
+  s.add_dependency 'refinerycms-i18n',            '~> 3.0.0'
   s.add_dependency 'awesome_nested_set',          '~> 3.0.0'
   s.add_dependency 'railties',                    rails_version
   s.add_dependency 'activerecord',                rails_version
   s.add_dependency 'actionpack',                  rails_version
   s.add_dependency 'truncate_html',               '~> 0.9'
   s.add_dependency 'will_paginate',               '~> 3.0.2'
-  s.add_dependency 'sass-rails',                  '~> 4.0.0'
-  s.add_dependency 'coffee-rails',                '~> 4.0.0'
+  s.add_dependency 'sass-rails',                  '>= 4.0', '< 5.1'
+  s.add_dependency 'coffee-rails',                ['~> 4.0', '>= 4.0.0']
   s.add_dependency 'jquery-rails',                '>= 2.3.0'
-  s.add_dependency 'jquery-ui-rails',             '~> 4.1.1'
+  s.add_dependency 'jquery-ui-rails',             '~> 5.0.0'
   s.add_dependency 'decorators',                  '~> 1.0.0'
 end

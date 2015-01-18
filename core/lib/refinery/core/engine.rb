@@ -29,9 +29,9 @@ module Refinery
       config.autoload_paths += %W( #{config.root}/lib )
 
       # Include the refinery controllers and helpers dynamically
-      config.to_prepare &method(:refinery_inclusion!).to_proc
+      config.to_prepare(&method(:refinery_inclusion!).to_proc)
 
-      after_inclusion &method(:register_decorators!).to_proc
+      after_inclusion(&method(:register_decorators!).to_proc)
 
       # Wrap errors in spans
       config.to_prepare do
@@ -75,7 +75,7 @@ module Refinery
         app.config.autoload_paths += [
           Rails.root.join('app', 'presenters'),
           Rails.root.join('vendor', '**', '**', 'app', 'presenters'),
-          Refinery.roots.map{|r| r.join('**', 'app', 'presenters')}
+          Refinery.roots.map{ |r| r.join('**', 'app', 'presenters')}
         ].flatten
       end
 

@@ -25,16 +25,16 @@ module Refinery
 
       def valid_templates(*pattern)
         ([Rails.root] | Refinery::Plugins.registered.pathnames).map { |p|
-          Dir[p.join(*pattern).to_s].flatten.map { |f|
+          Dir[p.join(*pattern).to_s].flatten.map do |f|
             File.basename(f).split('.').first
-          }
+          end
         }.flatten.uniq
       end
 
       def default_parts_for(page)
         return default_parts unless page.view_template.present?
 
-        types.find_by_name(page.view_template).parts.map &:titleize
+        types.find_by_name(page.view_template).parts.map(&:titleize)
       end
     end
 

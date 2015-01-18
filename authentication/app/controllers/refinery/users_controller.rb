@@ -2,7 +2,7 @@ module Refinery
   class UsersController < Devise::RegistrationsController
 
     # Protect these actions behind an admin login
-    before_filter :redirect?, :only => [:new, :create]
+    before_action :redirect?, :only => [:new, :create]
 
     helper Refinery::Core::Engine.helpers
     layout 'refinery/layouts/login'
@@ -19,7 +19,7 @@ module Refinery
         flash[:message] = t('welcome', scope: 'refinery.users.create', who: @user)
 
         sign_in(@user)
-        redirect_back_or_default(refinery.admin_root_path)
+        redirect_back_or_default(Refinery::Core.backend_path)
       else
         render :new
       end

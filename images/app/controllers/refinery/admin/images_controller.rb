@@ -4,10 +4,9 @@ module Refinery
 
       crudify :'refinery/image',
               order: "created_at DESC",
-              sortable: false,
-              xhr_paging: true
+              sortable: false
 
-      before_filter :change_list_mode_if_specified, :init_dialog
+      before_action :change_list_mode_if_specified, :init_dialog
 
       def new
         @image = ::Refinery::Image.new if @image.nil?
@@ -34,7 +33,7 @@ module Refinery
 
         paginate_images
 
-        render action: "insert"
+        render 'insert'
       end
 
       def create
@@ -66,19 +65,18 @@ module Refinery
             flash.notice = t('created', scope: 'refinery.crudify', what: "'#{@images.map(&:image_title).join("', '")}'")
             if from_dialog?
               @dialog_successful = true
-              render template: "/refinery/admin/dialog_success", layout: true
+              render '/refinery/admin/dialog_success', layout: true
             else
               redirect_to refinery.admin_images_path
             end
           else
             self.new # important for dialogs
-            render action: 'new'
+            render 'new'
           end
         end
       end
 
       def update
-        attributes_before_assignment = @image.attributes
         @image.attributes = image_params
         if @image.valid? && @image.save
           flash.notice = t(
@@ -109,7 +107,7 @@ module Refinery
                      include_object_name: true
                    }
           else
-            render action: 'edit'
+            render 'edit'
           end
         end
       end
@@ -143,7 +141,6 @@ module Refinery
       def auto_title(filename)
         CGI::unescape(filename.to_s).gsub(/\.\w+$/, '').titleize
       end
-
 
       def image_params
         params.require(:image).permit(:image, :image_size, :image_title, :image_alt)

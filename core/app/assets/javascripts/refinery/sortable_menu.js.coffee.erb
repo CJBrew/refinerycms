@@ -3,7 +3,7 @@
   return  if $menu.length == 0
   $menu.sortable(
     items: "> *:not(#menu_reorder, #menu_reorder_done)"
-    axis: "x"
+    axis: "y"
     cursor: "crosshair"
     connectWith: ".nested"
     update: ->
@@ -13,8 +13,8 @@
       )
   ).tabs()
   $menu.sortable "disable"
-  $menu.find("#menu_reorder").click (e) ->
+  $menu.find("#menu_reorder").on 'click', (e) ->
     trigger_reordering e, true
 
-  $menu.find("#menu_reorder_done").click (e) ->
+  $menu.find("#menu_reorder_done").on 'click', (e) ->
     trigger_reordering e, false

@@ -51,14 +51,14 @@ cd ExistingApp
 bundle
 rails generate devise:install
 rails generate devise User # Devise might be using another model name in your existing application
-bundle exec rake db:migrate
+bin/rake db:migrate
 </shell>
 
 Next we'll add a static, unrestricted home page, the notice and alert flashes to the application default layout, and a restricted_content controller and view.
 
 We'll also add a simple stylesheet, which in a real existing app, would be what we would like Refinery to integrate with on the front end, rather than refinery overriding it.
 
-To demonstrate another wrinkle you might discover, let's customize our use of Devise a tiny bit, by overriding the session controller to handle a before_filter to prevent logging in when the database is undergoing maintenance.
+To demonstrate another wrinkle you might discover, let's customize our use of Devise a tiny bit, by overriding the session controller to handle a before_action to prevent logging in when the database is undergoing maintenance.
 
 
 +app/views/layouts/application.html.erb+
@@ -94,7 +94,7 @@ end
 +app/controllers/users/sessions_controller.rb+
 <ruby>
 class Users::SessionsController < Devise::SessionsController
-  before_filter :block_login_during_maintenance
+  before_action :block_login_during_maintenance
   def block_login_during_maintenance
     return unless DB_UNDER_MAINTENANCE
     redirect_to db_maintenance_message_path
@@ -116,7 +116,7 @@ DB_UNDER_MAINTENANCE = false
 +app/controllers/restricted_content_controller.rb+
 <ruby>
 class RestrictedContentController < ApplicationController
-  before_filter :authenticate_user!
+  before_action :authenticate_user!
 end
 </ruby>
 
@@ -321,7 +321,7 @@ end
 </ruby>
 
 <shell>
-bundle exec rake db:migrate
+bin/rake db:migrate
 </shell>
 
 Now we need to add authentication goodness manually, it will just consist in telling refinery to use your devise helpers.
@@ -357,7 +357,7 @@ module ExistingApp
       end
 
       ::Refinery::AdminController.send :include, ::RestrictRefineryToRefineryUsers
-      ::Refinery::AdminController.send :before_filter, :restrict_refinery_to_refinery_users
+      ::Refinery::AdminController.send :before_action, :restrict_refinery_to_refinery_users
     end
   end
 end
@@ -410,7 +410,7 @@ If you try to access http://localhost:3000/refinery (Refinery's administrative b
 Indeed, we have to correct one view to set the proper url helper.
 
 <shell>
-bundle exec rake refinery:override view=refinery/_site_bar
+bin/rake refinery:override view=refinery/_site_bar
 </shell>
 
 Now the partial has been moved to your app, change @destroy_refinery_user_session_path@, with @destroy_user_session_path@.

@@ -33,12 +33,15 @@ it:
             link_to_this_resource: Link a questo file
       pages:
         delete: Eliminare per sempre questa pagina
-        edit: Modificare questa pagina
+        edit: Modifica questa pagina
         new: Aggiungi una nuova sotto-pagina
         page:
           view_live_html: Visualizza questa pagina<br/><em>(apre una nuova finestra del browser)</em>
           hidden: nascosto
           draft: bozza
+        form:
+          preview: Anteprima
+          preview_changes: Guarda in anteprima le tue modifiche prima di pubblicarle
         form_new_page_parts:
           title: Titolo
         form_page_parts:
@@ -66,4 +69,3 @@ it:
           reorder_pages_done: Riordino Pagine terminato
         records:
           no_pages_yet: Non è stata ancora creata nessuna pagina. Clicca su "Crea nuova pagina" per aggiungere la tua prima pagina.
-        translator_access: Non hai i permessi necessari per poter modificare pagine in questa lingua.
